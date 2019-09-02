@@ -1,0 +1,22 @@
+{
+  "name": "feedback-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "@kraftwerk28 <kefrchik3@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "watch": "NODE_ENV=development tsc -w"
+  },
+  "dependencies": {
+    "dotenv": "^8.1.0",
+    "js-yaml": "^3.13.1",
+    "telegraf": "^3.32.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/js-yaml": "^3.12.1",
+    "@types/node": "^12.7.3",
+    "typescript": "^3.6.2"
+  }
+}
