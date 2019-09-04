@@ -62,7 +62,7 @@ async function main() {
     console.log(`Webhook set onto ${whURL}`)
     bot.telegram.setWebhook(whURL)
     server = http.createServer(bot.webhookCallback(BOT_WEBHOOK_PATH!))
-    server.listen(PORT)
+    server.listen(PORT, () => console.log(`Server listening on :${PORT}`))
   }
   console.log(`Bot works in ${NODE_ENV} mode...`)
 }
