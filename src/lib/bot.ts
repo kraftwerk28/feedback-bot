@@ -1,5 +1,7 @@
+import http from 'http'
 import Telegraf from 'telegraf'
 import { start, all } from './middlewares'
+import { Server } from 'https';
 
 declare module 'telegraf' {
   export interface Telegram {
@@ -18,7 +20,8 @@ const {
   BOT_USERNAME,
   BOT_WEBHOOK_PATH,
   BOT_WEBHOOK_PORT,
-  BOT_WEBHOOK_HOST
+  BOT_WEBHOOK_HOST,
+  PORT
 } = process.env
 
 const bot = new Telegraf(BOT_TOKEN!, {
@@ -31,8 +34,10 @@ const bot = new Telegraf(BOT_TOKEN!, {
 bot.start(start)
 bot.on('message', all)
 
+let server: any
 async function main() {
   bot.stop()
+  await bot.telegram.deleteWebhook()
   let lastUpdateID = 0
   const getUpdateRec = async () => {
     const newUpdate = await bot.telegram.getUpdates(
@@ -53,12 +58,11 @@ async function main() {
   if (NODE_ENV === 'development') {
     bot.startPolling()
   } else {
-    bot.startWebhook(
-      BOT_WEBHOOK_PATH!,
-      null,
-      +BOT_WEBHOOK_PORT!,
-      BOT_WEBHOOK_HOST
+    bot.telegram.setWebhook(
+      `https://${BOT_WEBHOOK_HOST}:${BOT_WEBHOOK_PORT}/${BOT_WEBHOOK_PATH}`
     )
+    server = http.createServer(bot.webhookCallback(BOT_WEBHOOK_PATH!))
+    server.listen(PORT)
   }
   console.log(`Bot works in ${NODE_ENV} mode...`)
 }
@@ -67,7 +71,9 @@ main().catch(interrupt)
 
 function interrupt() {
   bot.stop()
-  process.exit(0)
+  server.close(() => {
+    process.exit(0)
+  })
 }
 
 process.on('SIGINT', interrupt)
