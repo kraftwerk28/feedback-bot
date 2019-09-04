@@ -58,9 +58,9 @@ async function main() {
   if (NODE_ENV === 'development') {
     bot.startPolling()
   } else {
-    bot.telegram.setWebhook(
-      `https://${BOT_WEBHOOK_HOST}:${BOT_WEBHOOK_PORT}/${BOT_WEBHOOK_PATH}`
-    )
+    const whURL = `https://${BOT_WEBHOOK_HOST}:${BOT_WEBHOOK_PORT}${BOT_WEBHOOK_PATH}`
+    console.log(`Webhook set onto ${whURL}`)
+    bot.telegram.setWebhook(whURL)
     server = http.createServer(bot.webhookCallback(BOT_WEBHOOK_PATH!))
     server.listen(PORT)
   }
