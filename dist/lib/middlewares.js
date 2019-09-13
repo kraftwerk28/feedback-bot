@@ -41,12 +41,10 @@ var ACI = process.env.ADMIN_CHAT_ID;
 var ADMIN_CHAT_ID = +ACI;
 function start(ctx) {
     return __awaiter(this, void 0, void 0, function () {
-        var reply;
         return __generator(this, function (_a) {
-            reply = i18n_1.fromLang('uk')('start');
-            if (reply) {
-                ctx.chat.id;
-                ctx.reply(reply, { reply_to_message_id: ctx.message.message_id });
+            ctx.reply(i18n_1.fromLang('uk')('start'), { reply_to_message_id: ctx.message.message_id });
+            if (ctx.chat.type !== 'private') {
+                ctx.reply(i18n_1.fromLang('uk')('only_private_chat_restriction'), { reply_to_message_id: ctx.message.message_id });
             }
             return [2 /*return*/];
         });
@@ -55,9 +53,39 @@ function start(ctx) {
 exports.start = start;
 function all(ctx) {
     return __awaiter(this, void 0, void 0, function () {
+        var forwarded_1, updateTypes;
         return __generator(this, function (_a) {
-            ctx.telegram.sendMessage(ADMIN_CHAT_ID, "From: " + (ctx.from.username ? "@" + ctx.from.username : ctx.from.first_name));
-            ctx.telegram.forwardMessage(ADMIN_CHAT_ID, ctx.chat.id, ctx.message.message_id);
+            if (ctx.chat.id === ADMIN_CHAT_ID) {
+                forwarded_1 = ctx.message.reply_to_message;
+                if (!forwarded_1)
+                    return [2 /*return*/];
+                updateTypes = ctx.updateSubTypes;
+                if (updateTypes.includes('text')) {
+                    ctx.telegram.sendMessage(forwarded_1.forward_from.id, ctx.message.text);
+                    return [2 /*return*/];
+                }
+                if (updateTypes.includes('sticker')) {
+                    ctx.telegram.sendSticker(forwarded_1.forward_from.id, ctx.message.sticker.file_id);
+                    return [2 /*return*/];
+                }
+                if (updateTypes.includes('photo')) {
+                    ctx.message.photo.forEach(function (ph) {
+                        ctx.telegram.sendPhoto(forwarded_1.forward_from.id, ph.file_id);
+                    });
+                    return [2 /*return*/];
+                }
+                if (updateTypes.includes('voice')) {
+                    ctx.telegram.sendVoice(forwarded_1.forward_from.id, ctx.message.voice.file_id);
+                    return [2 /*return*/];
+                }
+                return [2 /*return*/];
+            }
+            if (ctx.chat.type === 'private') {
+                ctx.telegram.sendMessage(ADMIN_CHAT_ID, '-'.repeat(40) + "\nFrom: " + (ctx.from.username ? "@" + ctx.from.username : ctx.from.first_name));
+                ctx.telegram.forwardMessage(ADMIN_CHAT_ID, ctx.chat.id, ctx.message.message_id);
+                ctx.reply(i18n_1.fromLang('uk')('message_accepted'), { reply_to_message_id: ctx.message.message_id });
+                return [2 /*return*/];
+            }
             return [2 /*return*/];
         });
     });

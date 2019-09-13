@@ -1,3 +1,5 @@
 replies:
   uk:
     start: Привіт. Це бот для зворотнього зв'язку з @kraftwerk28
+    only_private_chat_restriction: Я призначений лише для приватних повідомлень :)
+    message_accepted: Відправлено в обробку...

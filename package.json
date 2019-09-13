@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "watch": "NODE_ENV=development tsc -w"
+    "watch": "tsc -w",
+    "dev": "NODE_ENV=development node dist/"
   },
   "dependencies": {
     "dotenv": "^8.1.0",

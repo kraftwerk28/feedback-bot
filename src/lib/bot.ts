@@ -36,8 +36,7 @@ bot.on('message', all)
 
 let server: any
 async function main() {
-  bot.stop()
-  await bot.telegram.deleteWebhook()
+  await bot.stop().telegram.deleteWebhook()
   let lastUpdateID = 0
   const getUpdateRec = async () => {
     const newUpdate = await bot.telegram.getUpdates(
@@ -54,10 +53,9 @@ async function main() {
   }
 
   await getUpdateRec()
-  bot.stop()
   if (NODE_ENV === 'development') {
     bot.startPolling()
-  } else {
+  } else if (NODE_ENV === 'production') {
     const whURL = `https://${BOT_WEBHOOK_HOST}:${BOT_WEBHOOK_PORT}${BOT_WEBHOOK_PATH}`
     console.log(`Webhook set onto ${whURL}`)
     bot.telegram.setWebhook(whURL)
@@ -71,7 +69,7 @@ main().catch(interrupt)
 
 function interrupt() {
   bot.stop()
-  server.close(() => {
+  if (server) server.close(() => {
     process.exit(0)
   })
 }
