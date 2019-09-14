@@ -35,7 +35,7 @@ export async function start(ctx: ContextMessageUpdate) {
 export async function all(ctx: ContextMessageUpdate) {
   if (ctx.chat!.id === ADMIN_CHAT_ID) {
     const forwarded = ctx.message!.reply_to_message
-    if (!forwarded) return
+    if (!forwarded || !forwarded!.forward_from) return
     const updateTypes = ctx.updateSubTypes!
     if (updateTypes.includes('text')) {
       ctx.telegram.sendMessage(
