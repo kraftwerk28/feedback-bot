@@ -6,7 +6,7 @@ type LangToken = 'uk' | 'en' | 'ru'
 type I18nMap = Record<string, string>
 
 interface Ii18n {
-  replies: Record<LangToken, I18nMap>
+  replies: Record<LangToken, I18nMap>;
 }
 
 const i18n: Ii18n = safeLoad(readFileSync(

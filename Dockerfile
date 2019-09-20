@@ -2,6 +2,7 @@ FROM node:alpine
 WORKDIR /opt/build
 COPY ./ ./
 RUN yarn install
+RUN yarn lint
 RUN yarn build
 
 FROM node:alpine

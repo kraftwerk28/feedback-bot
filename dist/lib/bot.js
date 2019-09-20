@@ -50,7 +50,8 @@ var bot = new telegraf_1.default(BOT_TOKEN, {
     }
 });
 bot.start(middlewares_1.start);
-bot.on('message', middlewares_1.all);
+bot.on('message', middlewares_1.onMessage);
+bot.on('edited_message', middlewares_1.onEditMessage);
 var server;
 function main() {
     return __awaiter(this, void 0, void 0, function () {
@@ -100,7 +101,6 @@ function main() {
         });
     });
 }
-main().catch(interrupt);
 function interrupt() {
     bot.stop();
     if (server)
@@ -108,6 +108,7 @@ function interrupt() {
             process.exit(0);
         });
 }
+main().catch(interrupt);
 process.on('SIGINT', interrupt);
 process.on('SIGTERM', interrupt);
 process.on('unhandledRejection', interrupt);

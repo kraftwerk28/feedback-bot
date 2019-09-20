@@ -1,7 +1,8 @@
 import http from 'http'
 import Telegraf from 'telegraf'
-import { start, all } from './middlewares'
-import { Server } from 'https';
+import { start, onMessage, onEditMessage } from './middlewares'
+import { Server } from 'http'
+import { Update } from 'telegram-typings'
 
 declare module 'telegraf' {
   export interface Telegram {
@@ -10,7 +11,7 @@ declare module 'telegraf' {
       limit: number,
       offset: number,
       allowedUpdates?: string[]
-    ): any[]
+    ): Update[];
   }
 }
 
@@ -32,13 +33,14 @@ const bot = new Telegraf(BOT_TOKEN!, {
 })
 
 bot.start(start)
-bot.on('message', all)
+bot.on('message', onMessage)
+bot.on('edited_message', onEditMessage)
 
-let server: any
-async function main() {
+let server: Server
+async function main(): Promise<void> {
   await bot.stop().telegram.deleteWebhook()
   let lastUpdateID = 0
-  const getUpdateRec = async () => {
+  const getUpdateRec = async (): Promise<void> => {
     const newUpdate = await bot.telegram.getUpdates(
       undefined,
       100,
@@ -65,14 +67,15 @@ async function main() {
   console.log(`Bot works in ${NODE_ENV} mode...`)
 }
 
-main().catch(interrupt)
 
-function interrupt() {
+function interrupt(): void {
   bot.stop()
   if (server) server.close(() => {
     process.exit(0)
   })
 }
+
+main().catch(interrupt)
 
 process.on('SIGINT', interrupt)
 process.on('SIGTERM', interrupt)

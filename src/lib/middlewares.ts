@@ -1,13 +1,13 @@
 import { ContextMessageUpdate } from 'telegraf'
 import { fromLang } from './i18n'
+import { MessageSubTypes, User } from 'telegraf/typings/telegram-types'
 
 const { ADMIN_CHAT_ID: ACI } = process.env
 const ADMIN_CHAT_ID = +ACI!
 
-import { MessageSubTypes } from 'telegraf/typings/telegram-types'
 declare module 'telegraf' {
   export interface ContextMessageUpdate {
-    updateSubTypes?: MessageSubTypes[]
+    updateSubTypes?: MessageSubTypes[];
   }
   export interface Telegram {
     forwardMessage(
@@ -15,11 +15,18 @@ declare module 'telegraf' {
       fromChatId: number,
       messageId: number,
       extra?: Extra
-    ): void
+    ): void;
   }
 }
 
-export async function start(ctx: ContextMessageUpdate) {
+const unameFromUser = (u: User): string => {
+  if (u.username) return `@${u.username}`
+  let fullName = u.first_name
+  if (u.last_name) fullName += ` ${u.last_name}`
+  return fullName
+}
+
+export async function start(ctx: ContextMessageUpdate): Promise<any> {
   ctx.reply(
     fromLang('uk')('start')!,
     { reply_to_message_id: ctx.message!.message_id }
@@ -32,7 +39,7 @@ export async function start(ctx: ContextMessageUpdate) {
   }
 }
 
-export async function all(ctx: ContextMessageUpdate) {
+export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
   if (ctx.chat!.id === ADMIN_CHAT_ID) {
     const forwarded = ctx.message!.reply_to_message
     if (!forwarded || !forwarded!.forward_from) return
@@ -73,7 +80,7 @@ export async function all(ctx: ContextMessageUpdate) {
   if (ctx.chat!.type === 'private') {
     await ctx.telegram.sendMessage(
       ADMIN_CHAT_ID,
-      `${'-'.repeat(40)}\nFrom: ${ctx.from!.username ? `@${ctx.from!.username}` : ctx.from!.first_name}`
+      `${'-'.repeat(40)}\nFrom: ${unameFromUser(ctx.from!)}`
     )
     await ctx.telegram.forwardMessage(
       ADMIN_CHAT_ID,
@@ -86,4 +93,11 @@ export async function all(ctx: ContextMessageUpdate) {
     )
     return
   }
+}
+
+export async function onEditMessage(ctx: ContextMessageUpdate): Promise<any> {
+  await ctx.reply(
+    fromLang('uk')('edit_support')!,
+    { reply_to_message_id: ctx.editedMessage!.message_id }
+  )
 }

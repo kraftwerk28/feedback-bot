@@ -39,6 +39,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var i18n_1 = require("./i18n");
 var ACI = process.env.ADMIN_CHAT_ID;
 var ADMIN_CHAT_ID = +ACI;
+var unameFromUser = function (u) {
+    if (u.username)
+        return "@" + u.username;
+    var fullName = u.first_name;
+    if (u.last_name)
+        fullName += " " + u.last_name;
+    return fullName;
+};
 function start(ctx) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -51,43 +59,71 @@ function start(ctx) {
     });
 }
 exports.start = start;
-function all(ctx) {
+function onMessage(ctx) {
     return __awaiter(this, void 0, void 0, function () {
         var forwarded_1, updateTypes;
         return __generator(this, function (_a) {
-            if (ctx.chat.id === ADMIN_CHAT_ID) {
-                forwarded_1 = ctx.message.reply_to_message;
-                if (!forwarded_1)
+            switch (_a.label) {
+                case 0:
+                    if (!(ctx.chat.id === ADMIN_CHAT_ID)) return [3 /*break*/, 9];
+                    forwarded_1 = ctx.message.reply_to_message;
+                    if (!forwarded_1 || !forwarded_1.forward_from)
+                        return [2 /*return*/];
+                    updateTypes = ctx.updateSubTypes;
+                    if (!updateTypes.includes('text')) return [3 /*break*/, 2];
+                    return [4 /*yield*/, ctx.telegram.sendMessage(forwarded_1.forward_from.id, ctx.message.text)];
+                case 1:
+                    _a.sent();
                     return [2 /*return*/];
-                updateTypes = ctx.updateSubTypes;
-                if (updateTypes.includes('text')) {
-                    ctx.telegram.sendMessage(forwarded_1.forward_from.id, ctx.message.text);
+                case 2:
+                    if (!updateTypes.includes('sticker')) return [3 /*break*/, 4];
+                    return [4 /*yield*/, ctx.telegram.sendSticker(forwarded_1.forward_from.id, ctx.message.sticker.file_id)];
+                case 3:
+                    _a.sent();
                     return [2 /*return*/];
-                }
-                if (updateTypes.includes('sticker')) {
-                    ctx.telegram.sendSticker(forwarded_1.forward_from.id, ctx.message.sticker.file_id);
+                case 4:
+                    if (!updateTypes.includes('photo')) return [3 /*break*/, 6];
+                    return [4 /*yield*/, ctx.message.photo.forEach(function (ph) {
+                            ctx.telegram.sendPhoto(forwarded_1.forward_from.id, ph.file_id);
+                        })];
+                case 5:
+                    _a.sent();
                     return [2 /*return*/];
-                }
-                if (updateTypes.includes('photo')) {
-                    ctx.message.photo.forEach(function (ph) {
-                        ctx.telegram.sendPhoto(forwarded_1.forward_from.id, ph.file_id);
-                    });
+                case 6:
+                    if (!updateTypes.includes('voice')) return [3 /*break*/, 8];
+                    return [4 /*yield*/, ctx.telegram.sendVoice(forwarded_1.forward_from.id, ctx.message.voice.file_id)];
+                case 7:
+                    _a.sent();
                     return [2 /*return*/];
-                }
-                if (updateTypes.includes('voice')) {
-                    ctx.telegram.sendVoice(forwarded_1.forward_from.id, ctx.message.voice.file_id);
+                case 8: return [2 /*return*/];
+                case 9:
+                    if (!(ctx.chat.type === 'private')) return [3 /*break*/, 13];
+                    return [4 /*yield*/, ctx.telegram.sendMessage(ADMIN_CHAT_ID, '-'.repeat(40) + "\nFrom: " + unameFromUser(ctx.from))];
+                case 10:
+                    _a.sent();
+                    return [4 /*yield*/, ctx.telegram.forwardMessage(ADMIN_CHAT_ID, ctx.chat.id, ctx.message.message_id)];
+                case 11:
+                    _a.sent();
+                    return [4 /*yield*/, ctx.reply(i18n_1.fromLang('uk')('message_accepted'), { reply_to_message_id: ctx.message.message_id })];
+                case 12:
+                    _a.sent();
                     return [2 /*return*/];
-                }
-                return [2 /*return*/];
+                case 13: return [2 /*return*/];
             }
-            if (ctx.chat.type === 'private') {
-                ctx.telegram.sendMessage(ADMIN_CHAT_ID, '-'.repeat(40) + "\nFrom: " + (ctx.from.username ? "@" + ctx.from.username : ctx.from.first_name));
-                ctx.telegram.forwardMessage(ADMIN_CHAT_ID, ctx.chat.id, ctx.message.message_id);
-                ctx.reply(i18n_1.fromLang('uk')('message_accepted'), { reply_to_message_id: ctx.message.message_id });
-                return [2 /*return*/];
-            }
-            return [2 /*return*/];
         });
     });
 }
-exports.all = all;
+exports.onMessage = onMessage;
+function onEditMessage(ctx) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, ctx.reply(i18n_1.fromLang('uk')('edit_support'), { reply_to_message_id: ctx.editedMessage.message_id })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.onEditMessage = onEditMessage;
