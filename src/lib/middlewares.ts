@@ -1,6 +1,6 @@
 import { ContextMessageUpdate } from 'telegraf'
 import { fromLang } from './i18n'
-import { MessageSubTypes, User } from 'telegraf/typings/telegram-types'
+import { MessageSubTypes, User, Message } from 'telegraf/typings/telegram-types'
 
 const { ADMIN_CHAT_ID: ACI } = process.env
 const ADMIN_CHAT_ID = +ACI!
@@ -15,7 +15,7 @@ declare module 'telegraf' {
       fromChatId: number,
       messageId: number,
       extra?: Extra
-    ): void;
+    ): Promise<Message>;
   }
 }
 
@@ -80,17 +80,18 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
   if (ctx.chat!.type === 'private') {
     await ctx.telegram.sendMessage(
       ADMIN_CHAT_ID,
-      `${'-'.repeat(40)}\nFrom: ${unameFromUser(ctx.from!)}`
+      `${'-'.repeat(40)}\nFrom: ${unameFromUser(ctx.from!)} [${ctx.from!.id}]`
     )
     await ctx.telegram.forwardMessage(
       ADMIN_CHAT_ID,
       ctx.chat!.id,
       ctx.message!.message_id
-    )
-    await ctx.reply(
-      fromLang('uk')('message_accepted')!,
-      { reply_to_message_id: ctx.message!.message_id }
-    )
+    ).then(() => {
+      ctx.reply(
+        fromLang('uk')('message_accepted')!,
+        { reply_to_message_id: ctx.message!.message_id }
+      )
+    })
     return
   }
 }
