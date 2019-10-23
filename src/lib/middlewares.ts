@@ -78,20 +78,37 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
   }
 
   if (ctx.chat!.type === 'private') {
-    await ctx.telegram.sendMessage(
-      ADMIN_CHAT_ID,
-      `${'-'.repeat(40)}\nFrom: ${unameFromUser(ctx.from!)} [${ctx.from!.id}]`
-    )
-    await ctx.telegram.forwardMessage(
-      ADMIN_CHAT_ID,
-      ctx.chat!.id,
-      ctx.message!.message_id
-    ).then(() => {
-      ctx.reply(
-        fromLang('uk')('message_accepted')!,
-        { reply_to_message_id: ctx.message!.message_id }
+    if (
+      ctx.updateSubTypes &&
+      ctx.updateSubTypes.length === 1
+      && ctx.updateSubTypes.includes('text')
+    ) {
+      // if message contains only text
+      const msg = `${'-'.repeat(40)}\n` +
+        `From: ${unameFromUser(ctx.from!)} [${ctx.from!.id}]\n\n` +
+        ctx.message!.text
+      await ctx.telegram.sendMessage(
+        ADMIN_CHAT_ID,
+        msg
       )
-    })
+    } else {
+      // else => forward
+      await ctx.telegram.sendMessage(
+        ADMIN_CHAT_ID,
+        `${'-'.repeat(40)}\nFrom: ${unameFromUser(ctx.from!)} [${ctx.from!.id}]`
+      ).then(() => {
+        ctx.telegram.forwardMessage(
+          ADMIN_CHAT_ID,
+          ctx.chat!.id,
+          ctx.message!.message_id
+        ).then(() => {
+          // ctx.reply(
+          //   fromLang('uk')('message_accepted')!,
+          //   { reply_to_message_id: ctx.message!.message_id }
+          // )
+        })
+      })
+    }
     return
   }
 }
