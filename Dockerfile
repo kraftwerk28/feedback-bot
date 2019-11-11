@@ -11,4 +11,3 @@ COPY --from=0 /opt/build/dist ./
 COPY ./package.json ./yarn.lock ./
 RUN yarn install --prod
 COPY ./shared ./
-COPY .env ./

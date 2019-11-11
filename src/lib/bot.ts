@@ -11,7 +11,7 @@ declare module 'telegraf' {
       limit: number,
       offset: number,
       allowedUpdates?: string[]
-    ): Update[];
+    ): Update[]
   }
 }
 
@@ -24,6 +24,17 @@ const {
   BOT_WEBHOOK_HOST,
   PORT
 } = process.env
+
+const DEV = process.env.NODE_ENV === 'development'
+export function log(data: any): void {
+  if (DEV) {
+    if (typeof data === 'object') {
+      console.dir(data, { depth: 10 })
+    } else {
+      console.log('\r > ' + data)
+    }
+  }
+}
 
 const bot = new Telegraf(BOT_TOKEN!, {
   username: BOT_USERNAME!,
@@ -38,7 +49,8 @@ bot.on('edited_message', onEditMessage)
 
 let server: Server
 async function main(): Promise<void> {
-  await bot.stop().telegram.deleteWebhook()
+  await bot.stop()
+  await bot.telegram.deleteWebhook()
   let lastUpdateID = 0
   const getUpdateRec = async (): Promise<void> => {
     const newUpdate = await bot.telegram.getUpdates(
@@ -49,7 +61,7 @@ async function main(): Promise<void> {
     if (newUpdate.length > 0) {
       // eslint-disable-next-line require-atomic-updates
       lastUpdateID = newUpdate[newUpdate.length - 1].update_id
-      console.log(`Fetched old updates: ${lastUpdateID}`)
+      log(`Fetched old updates: ${lastUpdateID}`)
       await getUpdateRec()
     }
   }
@@ -59,24 +71,26 @@ async function main(): Promise<void> {
     bot.startPolling()
   } else if (NODE_ENV === 'production') {
     const whURL = `https://${BOT_WEBHOOK_HOST}:${BOT_WEBHOOK_PORT}${BOT_WEBHOOK_PATH}`
-    console.log(`Webhook set onto ${whURL}`)
+    log(`Webhook set onto ${whURL}`)
     bot.telegram.setWebhook(whURL)
     server = http.createServer(bot.webhookCallback(BOT_WEBHOOK_PATH!))
     server.listen(PORT, () => console.log(`Server listening on :${PORT}`))
   }
-  console.log(`Bot works in ${NODE_ENV} mode...`)
+  log(`Bot works in ${NODE_ENV} mode`)
 }
-
 
 function interrupt(): void {
-  bot.stop()
-  if (server) server.close(() => {
-    process.exit(0)
-  })
+  log('Starting graceful shutdown')
+  if (server) {
+    server.close(() => {
+      console.log('Server closed')
+      process.exit(0)
+    })
+  } else process.exit(0)
 }
 
-main().catch(interrupt)
+main() //.catch(interrupt)
 
 process.on('SIGINT', interrupt)
 process.on('SIGTERM', interrupt)
-process.on('unhandledRejection', interrupt)
+// process.on('unhandledRejection', interrupt)
