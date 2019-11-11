@@ -36,6 +36,7 @@ export function log(data: any): void {
   }
 }
 
+console.log('token: ' + BOT_TOKEN)
 const bot = new Telegraf(BOT_TOKEN!, {
   username: BOT_USERNAME!,
   telegram: {
