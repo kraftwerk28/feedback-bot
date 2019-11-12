@@ -6,7 +6,8 @@ import {
   ExtraEditMessage,
   ExtraPhoto,
   ExtraSticker,
-  ExtraVoice
+  ExtraVoice,
+  ExtraVideo
 } from 'telegraf/typings/telegram-types'
 import { log } from './bot'
 
@@ -67,10 +68,15 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
 
     const updateTypes = ctx.updateSubTypes!
 
-    const extra: ExtraEditMessage & ExtraPhoto & ExtraSticker & ExtraVoice = {
+    const extra: ExtraEditMessage &
+      ExtraPhoto &
+      ExtraSticker &
+      ExtraVoice &
+      ExtraVideo = {
       reply_to_message_id: remoteChat.messageId
     }
     const chatId = remoteChat.chatId
+    log(updateTypes)
 
     if (updateTypes.includes('text')) {
       await ctx.telegram
@@ -89,6 +95,11 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
     }
     if (updateTypes.includes('voice')) {
       await ctx.telegram.sendVoice(chatId, ctx.message!.voice!.file_id, extra)
+    }
+    if (updateTypes.includes('animation' as any)) {
+      ctx.telegram
+        .sendAnimation(chatId, ctx.message!.animation!.file_id, extra)
+        .catch(catchMsgSend)
     }
     return
   }
