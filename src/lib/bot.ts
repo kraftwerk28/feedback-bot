@@ -40,7 +40,7 @@ console.log('token: ' + BOT_TOKEN)
 const bot = new Telegraf(BOT_TOKEN!, {
   username: BOT_USERNAME!,
   telegram: {
-    webhookReply: true
+    webhookReply: false
   }
 })
 
