@@ -83,9 +83,9 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
         .catch(catchMsgSend)
     }
     if (updateTypes.includes('photo')) {
-      await ctx.message!.photo!.forEach(ph => {
-        ctx.telegram.sendPhoto(chatId, ph.file_id, extra).catch(catchMsgSend)
-      })
+      ctx.telegram
+        .sendPhoto(chatId, ctx.message!.photo![0].file_id, extra)
+        .catch(catchMsgSend)
     }
     if (updateTypes.includes('voice')) {
       await ctx.telegram.sendVoice(chatId, ctx.message!.voice!.file_id, extra)
