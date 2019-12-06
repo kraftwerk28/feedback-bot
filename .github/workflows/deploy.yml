@@ -40,7 +40,6 @@ jobs:
       - name: Deploy
         env:
           DOCKER_HOST: "ssh://$USER@$HOST"
-          PORT: "$SERVER_PORT"
         run: |
           docker-compose pull
           docker-compose up -d
