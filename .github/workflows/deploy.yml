@@ -41,5 +41,5 @@ jobs:
         env:
           DOCKER_HOST: "ssh://$USER@$HOST"
         run: |
-          docker-compose pull
+          # docker-compose pull
           docker-compose up -d
