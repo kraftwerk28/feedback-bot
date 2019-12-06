@@ -8,5 +8,4 @@ services:
       - 1491:1491
     environment:
       NODE_ENV: production
-    env_file: ./.env
     restart: always
