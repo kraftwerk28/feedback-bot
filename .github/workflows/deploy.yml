@@ -29,14 +29,14 @@ jobs:
           echo "$SSH_PK" >> ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+      - name: Getting .env
+        run: |
+          scp "$USER@$HOST:~/dotenv/feedback_bot" .env
       - name: Build image
         run: |
           docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
           docker-compose build
           docker-compose push
-      - name: Getting .env
-        run: |
-          scp "$USER@$HOST:~/dotenv/feedback_bot" ".env"
       - name: Deploy
         env:
           DOCKER_HOST: "ssh://$USER@$HOST"
