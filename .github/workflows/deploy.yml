@@ -27,7 +27,7 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir ~/.ssh/
-          echo $SSH_PK >> ~/.ssh/id_rsa
+          echo "$SSH_PK" >> ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
       - name: Getting .env
