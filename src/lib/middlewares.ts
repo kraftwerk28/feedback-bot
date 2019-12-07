@@ -35,6 +35,13 @@ const unameFromUser = (u: User): string => {
   return fullName
 }
 
+const linkFromUser = (u: User): string => {
+  const id = u.id
+  let text = u.first_name
+  if (u.last_name) text += ` ${u.last_name}`
+  return `<a href="tg://user?id=${id}">${text}</a>`
+}
+
 export async function start(ctx: ContextMessageUpdate): Promise<any> {
   ctx.reply(fromLang('uk')('start')!, {
     reply_to_message_id: ctx.message!.message_id
@@ -116,8 +123,9 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
 
     // prelude text
     const fromText =
-      `From: ${unameFromUser(ctx.from!)} [${ctx.from!.id}]\n` +
-      `${'-'.repeat(40)}\n` +
+      `From: ${linkFromUser(ctx.from!)} [<code>${ctx.from!.id}</code>]\n` +
+      '-'.repeat(40) +
+      '\n' +
       (shouldntForward ? ctx.message!.text : '')
 
     await ctx.telegram.sendMessage(ADMIN_CHAT_ID, fromText).then(msg => {
