@@ -23,23 +23,25 @@ jobs:
             -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" \
             -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
+          sudo cat /etc/resolv.conf
       - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_PK" >> ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
-          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+          cd ~
+          mkdir .ssh/
+          echo $SSH_PK >> .ssh/id_rsa
+          chmod 400 .ssh/id_rsa
+          ssh-keyscan -H $HOST >> .ssh/known_hosts
       - name: Getting .env
         run: |
           scp "$USER@$HOST:~/dotenv/feedback_bot" .env
       - name: Build image
         run: |
-          docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker-compose build
           docker-compose push
       - name: Deploy
         env:
           DOCKER_HOST: "ssh://$USER@$HOST"
         run: |
-          # docker-compose pull
+          docker-compose pull
           docker-compose up -d
