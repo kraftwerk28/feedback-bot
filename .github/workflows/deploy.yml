@@ -23,9 +23,6 @@ jobs:
             -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" \
             -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
-          sudo cat /etc/resolv.conf
-          ping -c 3 8.8.8.8
-          ping -c 3 google.com
       - name: Setup SSH
         run: |
           mkdir ~/.ssh/
@@ -37,7 +34,7 @@ jobs:
           scp "$USER@$HOST:~/dotenv/feedback_bot" .env
       - name: Build image
         run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
           docker-compose build
           docker-compose push
       - name: Deploy
