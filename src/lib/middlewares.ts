@@ -128,17 +128,19 @@ export async function onMessage(ctx: ContextMessageUpdate): Promise<any> {
       '\n' +
       (shouldntForward ? ctx.message!.text : '')
 
-    await ctx.telegram.sendMessage(ADMIN_CHAT_ID, fromText).then(msg => {
-      replyCache.set(msg.message_id, remoteChat)
-      if (shouldntForward) return
+    await ctx.telegram
+      .sendMessage(ADMIN_CHAT_ID, fromText, { parse_mode: 'HTML' })
+      .then(msg => {
+        replyCache.set(msg.message_id, remoteChat)
+        if (shouldntForward) return
 
-      // if not only text then forward
-      ctx.telegram
-        .forwardMessage(ADMIN_CHAT_ID, ctx.chat!.id, ctx.message!.message_id)
-        .then(fwmsg => {
-          replyCache.set(fwmsg.message_id, remoteChat)
-        })
-    })
+        // if not only text then forward
+        ctx.telegram
+          .forwardMessage(ADMIN_CHAT_ID, ctx.chat!.id, ctx.message!.message_id)
+          .then(fwmsg => {
+            replyCache.set(fwmsg.message_id, remoteChat)
+          })
+      })
 
     return
   }
