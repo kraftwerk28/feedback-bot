@@ -26,11 +26,10 @@ jobs:
           sudo cat /etc/resolv.conf
       - name: Setup SSH
         run: |
-          cd ~
-          mkdir .ssh/
-          echo $SSH_PK >> .ssh/id_rsa
-          chmod 400 .ssh/id_rsa
-          ssh-keyscan -H $HOST >> .ssh/known_hosts
+          mkdir ~/.ssh/
+          echo $SSH_PK >> ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
       - name: Getting .env
         run: |
           scp "$USER@$HOST:~/dotenv/feedback_bot" .env
