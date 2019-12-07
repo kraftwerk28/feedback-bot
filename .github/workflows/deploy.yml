@@ -24,6 +24,8 @@ jobs:
             -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           sudo cat /etc/resolv.conf
+          ping -c 3 8.8.8.8
+          ping -c 3 google.com
       - name: Setup SSH
         run: |
           mkdir ~/.ssh/
