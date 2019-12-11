@@ -40,8 +40,7 @@ jobs:
           docker-compose build
           docker-compose push
       - name: Deploy
-        env:
-          DOCKER_HOST: "ssh://$USER@$HOST"
         run: |
+          export DOCKER_HOST="ssh://$USER@$HOST"
           docker-compose pull
           docker-compose up -d
