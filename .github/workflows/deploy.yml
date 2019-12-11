@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
+      - name: Ping some shit
+        run: |
+          ping -c 2 8.8.8.8
+          ping -c 2 google.com
+          ping -c 2 kraftwerk28.pp.ua
       - name: Prepare VM
         run: |
           sudo mkdir -p "/usr/local/bin/docker"
