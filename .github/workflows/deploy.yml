@@ -12,13 +12,15 @@ env:
   DOCKER_USER: ${{ secrets.USER }}
   DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
   SERVER_PORT: 1495
+  COMPOSE_MAIN: docker-compose.yml
+  COMPOSE_PULL: docker-compose.pull.yml
 
 jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - name: Prepare machine
+      - name: Update packages
         run: |
           sudo mkdir -p "/usr/local/bin/docker"
           sudo curl \
@@ -37,10 +39,11 @@ jobs:
       - name: Build image
         run: |
           docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-          docker-compose build
-          docker-compose push
+          docker-compose -f $COMPOSE_MAIN -f $COMPOSE_PULL build
+          docker-compose -f $COMPOSE_MAIN -f $COMPOSE_PULL push
       - name: Deploy
+        env:
+          DOCKER_HOST: "ssh://${{ env.USER }}@${{ env.HOST }}"
         run: |
-          export DOCKER_HOST="ssh://$USER@$HOST"
-          docker-compose pull
-          docker-compose up -d
+          docker-compose -f $COMPOSE_PULL pull
+          docker-compose -f $COMPOSE_MAIN -f $COMPOSE_PULL up -d
